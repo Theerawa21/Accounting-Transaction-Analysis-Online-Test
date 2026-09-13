@@ -10,55 +10,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --navy:#123d72;
-      --blue:#1f67b1;
-      --pale:#eef6ff;
-      --line:#dbe8f6;
-      --text:#17324d;
-      --muted:#63798f;
-      --white:#fff;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:"Sarabun",sans-serif;color:var(--text);background:var(--pale)}
-    .page{min-height:100dvh;display:grid;grid-template-rows:auto 1fr}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(16px,4vw,42px);background:#fff;border-bottom:1px solid var(--line)}
-    .brand h1{margin:0;color:var(--navy);font-size:clamp(22px,3vw,34px);line-height:1.2}
-    .brand p{margin:5px 0 0;color:var(--muted);font-size:15px}
-    main{display:grid;place-items:center;padding:28px 18px}
-    .card{width:min(720px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 50px rgba(18,61,114,.10);padding:clamp(28px,5vw,48px);text-align:center}
-    .icon{width:72px;height:72px;margin:0 auto 20px;border-radius:20px;background:var(--pale);display:grid;place-items:center;color:var(--navy);font-size:34px;font-weight:700}
-    h2{margin:0;color:var(--navy);font-size:clamp(24px,3vw,32px)}
-    .lead{margin:12px auto 0;max-width:560px;color:var(--muted);font-size:17px;line-height:1.7}
-    .info{margin:24px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .info div{padding:14px 10px;border:1px solid var(--line);border-radius:14px;background:#f9fcff}
-    .info b{display:block;color:var(--navy);font-size:20px}.info span{display:block;margin-top:3px;color:var(--muted);font-size:13px}
-    .start{display:inline-flex;align-items:center;justify-content:center;min-width:min(360px,100%);min-height:58px;padding:0 28px;border-radius:14px;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:20px;box-shadow:0 10px 24px rgba(18,61,114,.18)}
-    .start:hover{background:var(--blue)}
-    .note{margin:14px 0 0;color:var(--muted);font-size:13px}
+    :root{--navy:#123d72;--blue:#1f67b1;--pale:#eef6ff;--line:#dbe8f6;--text:#17324d;--muted:#63798f;--white:#fff}
+    *{box-sizing:border-box}body{margin:0;font-family:"Sarabun",sans-serif;color:var(--text);background:var(--pale)}
+    .page{min-height:100dvh;display:grid;grid-template-rows:auto 1fr}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(16px,4vw,42px);background:#fff;border-bottom:1px solid var(--line)}
+    .brand h1{margin:0;color:var(--navy);font-size:clamp(22px,3vw,34px);line-height:1.2}.brand p{margin:5px 0 0;color:var(--muted);font-size:15px}
+    main{display:grid;place-items:center;padding:28px 18px}.card{width:min(720px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 50px rgba(18,61,114,.10);padding:clamp(28px,5vw,48px);text-align:center}
+    .icon{width:72px;height:72px;margin:0 auto 20px;border-radius:20px;background:var(--pale);display:grid;place-items:center;color:var(--navy);font-size:34px;font-weight:700}h2{margin:0;color:var(--navy);font-size:clamp(24px,3vw,32px)}
+    .lead{margin:12px auto 0;max-width:560px;color:var(--muted);font-size:17px;line-height:1.7}.info{margin:24px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.info div{padding:14px 10px;border:1px solid var(--line);border-radius:14px;background:#f9fcff}.info b{display:block;color:var(--navy);font-size:20px}.info span{display:block;margin-top:3px;color:var(--muted);font-size:13px}
+    .start{display:inline-flex;align-items:center;justify-content:center;min-width:min(360px,100%);min-height:58px;padding:0 28px;border-radius:14px;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:20px;box-shadow:0 10px 24px rgba(18,61,114,.18)}.start:hover{background:var(--blue)}.note{margin:14px 0 0;color:var(--muted);font-size:13px}
     @media(max-width:640px){.brand p{display:none}.topbar{padding:12px 14px}.info{grid-template-columns:1fr}.card{padding:28px 20px}.start{min-width:100%}}
   </style>
 </head>
 <body>
   <div class="page">
     <header class="topbar">
-      <div class="brand">
-        <h1>แบบทดสอบการวิเคราะห์รายการค้า</h1>
-        <p>สินทรัพย์ • หนี้สิน • ส่วนของเจ้าของ</p>
-      </div>
+      <div class="brand"><h1>แบบทดสอบการวิเคราะห์รายการค้า</h1><p>สินทรัพย์ • หนี้สิน • ส่วนของเจ้าของ</p></div>
     </header>
     <main>
       <section class="card">
         <div class="icon">✓</div>
         <h2>พร้อมเริ่มทำแบบทดสอบ</h2>
-        <p class="lead">ระบบจะเปิดแบบทดสอบจาก Google Apps Script โดยตรง เพื่อให้โหลดเร็วและเสถียรกว่าการฝังหน้าเว็บผ่าน iframe</p>
+        <p class="lead">กดปุ่มด้านล่างเพื่อเข้าสู่ระบบทดสอบ โดยระบบจะเปิด Google Apps Script โดยตรงเพื่อให้โหลดเร็วและเสถียร</p>
         <div class="info">
           <div><b>20 ข้อ</b><span>แบบทดสอบต่อคน</span></div>
           <div><b>30 นาที</b><span>เวลาทำแบบทดสอบ</span></div>
           <div><b>60%</b><span>เกณฑ์ผ่าน</span></div>
         </div>
-        <a class="start" href="https://script.google.com/macros/s/AKfycbwGK6Y9o1sanqMWWHTs1tRDkMp9g4a30M1FjgO95HzwgCf9OSqI8AXGr8gi-_lT3ARe/exec">เริ่มทำแบบทดสอบ</a>
-        <p class="note">หากหน้าแบบทดสอบเปิดช้า กรุณารอสักครู่ เนื่องจาก Google Apps Script อาจมีเวลาเริ่มต้นระบบในครั้งแรก</p>
+        <a class="start" href="https://script.google.com/macros/s/AKfycbxOgIAYluNrze8GQxtHgCPr8ZDL4ShWNd00-bZIRK4KsRI7FdCVSfE60k6VUxgBIV5f/exec">เริ่มทำแบบทดสอบ</a>
+        <p class="note">ใช้รหัสประจำตัวนักเรียนเพื่อเข้าสอบ ระบบจะดึงชื่อ ชั้น ห้อง และเลขที่ให้อัตโนมัติ</p>
       </section>
     </main>
   </div>
