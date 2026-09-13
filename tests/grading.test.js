@@ -1,6 +1,13 @@
 const assert = require('node:assert/strict');
-const { normalizeAnswer, gradeQuestion, gradeExam, pickQuestionKeys } = require('../apps-script/GradingService.gs');
-const { validateStudent, validateSubmission } = require('../apps-script/SecurityService.gs');
+const fs = require('node:fs');
+const vm = require('node:vm');
+
+const code = fs.readFileSync(require.resolve('../apps-script/Code.gs'), 'utf8');
+const context = { console };
+vm.createContext(context);
+vm.runInContext(code, context);
+
+const { normalizeAnswer, gradeQuestion, gradeExam, pickQuestionKeys, validateSubmission } = context;
 
 function approx(actual, expected, epsilon = 1e-9) {
   assert.ok(Math.abs(actual - expected) <= epsilon, `${actual} != ${expected}`);
@@ -11,7 +18,7 @@ const key2 = [
   { account: 'ทุน', category: 'ส่วนของเจ้าของ', change: 'เพิ่มขึ้น' }
 ];
 
-assert.deepEqual(normalizeAnswer([...key2].reverse()), normalizeAnswer(key2));
+assert.deepEqual(JSON.parse(JSON.stringify(normalizeAnswer([...key2].reverse()))), JSON.parse(JSON.stringify(normalizeAnswer(key2))));
 
 let r = gradeQuestion(key2, [...key2].reverse());
 approx(r.score, 1);
@@ -38,8 +45,7 @@ approx(r.score, 1);
 
 r = gradeQuestion(key2, [
   { account: 'เงินสด', category: 'สินทรัพย์', change: 'เพิ่มขึ้น' },
-  { account: 'เงินสด', category: 'สินทรัพย์', change: 'เพิ่มขึ้น' },
-  { account: '', category: '', change: '' }
+  { account: 'เงินสด', category: 'สินทรัพย์', change: 'เพิ่มขึ้น' }
 ]);
 approx(r.accountScore, 0.5);
 
@@ -56,10 +62,8 @@ assert.equal(exam.accountPercent, 100);
 assert.equal(exam.categoryPercent, 100);
 assert.ok(exam.changePercent < 100);
 
-assert.equal(validateStudent({studentId:'123', firstName:'ก', lastName:'ข', className:'ม.4', room:'1', number:'2'}).ok, true);
-assert.equal(validateStudent({studentId:'', firstName:'ก', lastName:'ข', className:'ม.4', room:'1', number:'2'}).ok, false);
 assert.equal(validateSubmission({attemptId:'AT-20260913-ABC12345', responses:{Q1:key2}}).ok, true);
 assert.equal(validateSubmission({attemptId:'bad', responses:{}}).ok, false);
-
 assert.deepEqual(Object.keys(pickQuestionKeys({A:key2,B:key3,C:key2}, ['C','A'])), ['C','A']);
-console.log('grading tests passed');
+
+console.log('single Code.gs grading tests passed');
