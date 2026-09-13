@@ -6,7 +6,7 @@
 - หนี้สิน
 - ส่วนของเจ้าของ
 
-ระบบใช้ Google Sheets เป็นฐานข้อมูล, Google Apps Script เป็น Backend/เว็บแอป และเก็บ Source Code ใน GitHub
+ระบบใช้ Google Sheets เป็นฐานข้อมูล, Google Apps Script เป็น Backend/ระบบตรวจคำตอบ และใช้ GitHub Pages เป็นหน้าทางเข้าระบบ
 
 ## Features
 
@@ -20,10 +20,13 @@
 - Dashboard ครูพร้อมค้นหาและ Export CSV
 - เฉลยอยู่ฝั่ง Server เท่านั้น
 - Responsive และใช้ฟอนต์ Sarabun
+- มีหน้า GitHub Pages สำหรับนักเรียน (`index.html`) และครู (`teacher.html`)
 
 ## Repository
 
 ```text
+index.html
+teacher.html
 apps-script/
   Code.gs
   Config.gs
@@ -46,6 +49,45 @@ tests/
   grading.test.js
 ```
 
+## Google Apps Script Web App
+
+Backend ที่ Deploy แล้ว:
+
+```text
+https://script.google.com/macros/s/AKfycbwGK6Y9o1sanqMWWHTs1tRDkMp9g4a30M1FjgO95HzwgCf9OSqI8AXGr8gi-_lT3ARe/exec
+```
+
+Dashboard ครู:
+
+```text
+https://script.google.com/macros/s/AKfycbwGK6Y9o1sanqMWWHTs1tRDkMp9g4a30M1FjgO95HzwgCf9OSqI8AXGr8gi-_lT3ARe/exec?view=teacher
+```
+
+## เปิด GitHub Pages
+
+หลัง Merge branch นี้เข้า `main`:
+
+1. เปิด repository บน GitHub
+2. ไปที่ **Settings → Pages**
+3. ใน **Build and deployment** เลือก **Deploy from a branch**
+4. เลือก Branch = `main`
+5. Folder = `/ (root)`
+6. กด **Save**
+
+เมื่อ GitHub Pages สร้างเว็บไซต์แล้ว URL หลักจะมีรูปแบบ:
+
+```text
+https://theerawa21.github.io/Accounting-Transaction-Analysis-Online-Test/
+```
+
+หน้าครู:
+
+```text
+https://theerawa21.github.io/Accounting-Transaction-Analysis-Online-Test/teacher.html
+```
+
+> GitHub Pages ทำหน้าที่เป็นหน้าเว็บทางเข้า ส่วนข้อมูลนักเรียน ข้อสอบ เฉลย และคะแนนยังคงอยู่ที่ Google Sheets / Google Apps Script
+
 ## Test
 
 ต้องมี Node.js 18+ แล้วรัน:
@@ -56,7 +98,7 @@ node tests/grading.test.js
 
 ชุดทดสอบครอบคลุมการสลับลำดับแถว, คะแนนบางส่วน, โจทย์ 3 บัญชี, แถวซ้ำ และการเลือกเฉพาะ QuestionID ที่ถูกมอบหมาย
 
-## Deploy
+## Deploy Apps Script
 
 ดูขั้นตอนละเอียดที่ `docs/SETUP.md`
 
