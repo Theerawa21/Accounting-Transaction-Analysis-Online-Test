@@ -1,0 +1,94 @@
+<script>
+(function(){
+  'use strict';
+  const STORAGE_KEY='ataot:session:v1';
+  const state={config:null,accounts:[],student:null,attempt:null,questions:[],answers:{},index:0,timer:null,dashboard:null};
+  const $=id=>document.getElementById(id);
+
+  function gas(name,...args){return new Promise((resolve,reject)=>{const runner=google.script.run.withSuccessHandler(resolve).withFailureHandler(err=>reject(new Error(err&&err.message?err.message:String(err))));runner[name](...args);});}
+  function showOnly(id){['loadingView','startView','examView','resultView','teacherView'].forEach(v=>$(v).classList.toggle('hidden',v!==id));}
+  function toast(message){const el=$('toast');el.textContent=message;el.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hidden'),3200);}
+  function setBusy(btn,busy,label){if(!btn)return;if(busy){btn.dataset.label=btn.textContent;btn.disabled=true;btn.textContent=label||'กำลังดำเนินการ...';}else{btn.disabled=false;btn.textContent=btn.dataset.label||btn.textContent;}}
+  function pct(v){return `${Math.round(Number(v)||0)}%`;}
+  function escapeCsv(v){const s=String(v??'');return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;}
+
+  async function boot(){
+    try{
+      if(window.INITIAL_VIEW==='teacher'){showOnly('teacherView');bindTeacher();return;}
+      const [config,accounts]=await Promise.all([gas('getExamConfig'),gas('getAccounts')]);
+      state.config=config;state.accounts=accounts;
+      $('brandTitle').textContent=config.title;$('questionCountText').textContent=config.questionCount;$('examTimeText').textContent=config.examTimeMinutes;
+      bindStudent();
+      if(!restoreSession()) showOnly('startView');
+    }catch(err){showOnly('startView');toast(err.message);}
+  }
+
+  function bindStudent(){
+    $('studentForm').addEventListener('submit',startExam);
+    $('prevBtn').addEventListener('click',()=>goTo(state.index-1));
+    $('nextBtn').addEventListener('click',()=>goTo(state.index+1));
+    $('submitBtn').addEventListener('click',()=>confirmSubmit(false));
+    $('restartBtn').addEventListener('click',()=>{clearSession();location.reload();});
+    $('modalCancel').addEventListener('click',closeModal);
+    $('modalConfirm').addEventListener('click',()=>{closeModal();submitExam(false);});
+  }
+
+  async function startExam(event){
+    event.preventDefault();
+    const btn=event.submitter||$('studentForm').querySelector('button[type=submit]');
+    const fd=new FormData(event.currentTarget);
+    const student=Object.fromEntries(fd.entries());
+    setBusy(btn,true,'กำลังสร้างข้อสอบ...');
+    try{
+      const attempt=await gas('startExam',student);
+      state.student=student;state.attempt=attempt;state.questions=attempt.questions;state.answers={};state.index=0;
+      state.questions.forEach(q=>state.answers[q.id]=emptyRows(q.answerCount));
+      saveSession();showExam();
+    }catch(err){toast(err.message);}finally{setBusy(btn,false);}
+  }
+
+  function emptyRows(count){return Array.from({length:count},()=>({account:'',category:'',change:''}));}
+  function showExam(){showOnly('examView');$('timerBox').classList.remove('hidden');$('studentNameText').textContent=`${state.student.firstName} ${state.student.lastName}`;$('studentMetaText').textContent=`${state.student.className}/${state.student.room} เลขที่ ${state.student.number}`;$('formIdText').textContent=state.attempt.formId;renderNav();renderQuestion();startTimer();}
+
+  function renderNav(){const grid=$('questionNavGrid');grid.innerHTML='';state.questions.forEach((q,i)=>{const b=document.createElement('button');b.type='button';b.className='nav-btn';b.textContent=i+1;b.addEventListener('click',()=>goTo(i));grid.appendChild(b);});updateNav();}
+  function updateNav(){[...$('questionNavGrid').children].forEach((b,i)=>{const q=state.questions[i];b.classList.toggle('answered',isAnswered(q));b.classList.toggle('current',i===state.index);});const answered=state.questions.filter(isAnswered).length;$('progressBar').style.width=`${state.questions.length?answered/state.questions.length*100:0}%`;}
+  function isAnswered(q){const rows=state.answers[q.id]||[];return rows.length===q.answerCount&&rows.every(r=>r.account&&r.category&&r.change);}
+
+  function renderQuestion(){const q=state.questions[state.index];if(!q)return;$('questionPosition').textContent=`ข้อ ${state.index+1} จาก ${state.questions.length}`;$('questionText').textContent=q.text;$('difficultyText').textContent=q.difficulty||'';const body=$('answerRows');body.innerHTML='';const rows=state.answers[q.id]||emptyRows(q.answerCount);rows.forEach((row,rowIndex)=>{const tr=document.createElement('tr');tr.appendChild(selectCell(accountOptions(),row.account,'account',rowIndex));tr.appendChild(selectCell(state.config.categories,row.category,'category',rowIndex));tr.appendChild(selectCell(state.config.changes,row.change,'change',rowIndex));body.appendChild(tr);});$('prevBtn').disabled=state.index===0;const last=state.index===state.questions.length-1;$('nextBtn').classList.toggle('hidden',last);$('submitBtn').classList.toggle('hidden',!last);updateNav();}
+  function accountOptions(){return state.accounts.map(a=>a.name);}
+  function selectCell(options,value,field,rowIndex){const td=document.createElement('td');const s=document.createElement('select');const blank=document.createElement('option');blank.value='';blank.textContent='— เลือก —';s.appendChild(blank);options.forEach(opt=>{const o=document.createElement('option');o.value=opt;o.textContent=opt;s.appendChild(o);});s.value=value||'';s.addEventListener('change',()=>{const q=state.questions[state.index];state.answers[q.id][rowIndex][field]=s.value;saveSession();updateNav();});td.appendChild(s);return td;}
+  function goTo(index){if(index<0||index>=state.questions.length)return;state.index=index;saveSession();renderQuestion();window.scrollTo({top:0,behavior:'smooth'});}
+
+  function startTimer(){clearInterval(state.timer);tick();state.timer=setInterval(tick,1000);}
+  function tick(){if(!state.attempt)return;const remaining=Math.max(0,new Date(state.attempt.expiresAt).getTime()-Date.now());const sec=Math.ceil(remaining/1000);const mm=String(Math.floor(sec/60)).padStart(2,'0');const ss=String(sec%60).padStart(2,'0');$('timerBox').textContent=`${mm}:${ss}`;$('timerBox').classList.toggle('warning',sec<=300);if(sec<=0){clearInterval(state.timer);confirmSubmit(true);}}
+
+  function confirmSubmit(auto){const answered=state.questions.filter(isAnswered).length;const unanswered=state.questions.length-answered;if(auto){submitExam(true);return;}$('modalTitle').textContent='ยืนยันการส่งแบบทดสอบ';$('modalMessage').textContent=`ตอบแล้ว ${answered} ข้อ • ยังไม่ตอบ ${unanswered} ข้อ เมื่อส่งแล้วจะไม่สามารถแก้ไขคำตอบได้`;$('modal').classList.remove('hidden');}
+  function closeModal(){$('modal').classList.add('hidden');}
+
+  async function submitExam(auto){
+    const btn=$('submitBtn');setBusy(btn,true,'กำลังตรวจคำตอบ...');
+    try{
+      const result=await gas('submitExam',{attemptId:state.attempt.attemptId,responses:state.answers});
+      clearInterval(state.timer);clearSession();showResult(result);if(auto)toast('หมดเวลา ระบบส่งคำตอบให้แล้ว');
+    }catch(err){toast(err.message);}finally{setBusy(btn,false);}
+  }
+
+  function showResult(result){showOnly('resultView');$('timerBox').classList.add('hidden');$('resultScore').textContent=pct(result.percent);$('resultName').textContent=result.studentName;$('resultMeta').textContent=`${result.className}/${result.room} เลขที่ ${result.number} • ชุด ${result.formId}`;const pass=result.status==='ผ่าน';$('resultStatus').textContent=result.status;$('resultStatus').classList.toggle('review',!pass);setSkill('account',result.accountPercent);setSkill('category',result.categoryPercent);setSkill('change',result.changePercent);$('recommendation').textContent=recommendation(result);}
+  function setSkill(prefix,value){$(prefix+'Score').textContent=pct(value);$(prefix+'Bar').style.width=`${Math.max(0,Math.min(100,Number(value)||0))}%`;}
+  function recommendation(r){const scores=[['การระบุบัญชี',r.accountPercent],['การจำแนกหมวดบัญชี',r.categoryPercent],['การวิเคราะห์เพิ่ม/ลด',r.changePercent]].sort((a,b)=>a[1]-b[1]);if(scores[0][1]>=80)return'ทำได้ดีในทั้ง 3 ทักษะ ควรรักษาความแม่นยำและฝึกโจทย์ 3 บัญชีต่อไป';if(scores[0][0]==='การจำแนกหมวดบัญชี')return'ควรทบทวนการจำแนกบัญชีเป็น สินทรัพย์ หนี้สิน และส่วนของเจ้าของ';if(scores[0][0]==='การวิเคราะห์เพิ่ม/ลด')return'ควรทบทวนผลกระทบของรายการค้าต่อสมการบัญชี โดยฝึกดูว่าบัญชีใดเพิ่มขึ้นหรือลดลง';return'ควรฝึกระบุชื่อบัญชีที่ได้รับผลกระทบจากรายการค้าให้ครบก่อนวิเคราะห์หมวดและการเพิ่ม/ลด';}
+
+  function saveSession(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({student:state.student,attempt:state.attempt,questions:state.questions,answers:state.answers,index:state.index}));}catch(_){}}
+  function restoreSession(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(!saved||!saved.attempt||!saved.questions||Date.now()>new Date(saved.attempt.expiresAt).getTime())return false;state.student=saved.student;state.attempt=saved.attempt;state.questions=saved.questions;state.answers=saved.answers||{};state.index=Number(saved.index)||0;state.questions.forEach(q=>{if(!state.answers[q.id])state.answers[q.id]=emptyRows(q.answerCount);});showExam();toast('กู้คืนคำตอบจากการทำข้อสอบครั้งก่อนแล้ว');return true;}catch(_){return false;}}
+  function clearSession(){try{localStorage.removeItem(STORAGE_KEY);}catch(_){}}
+
+  function bindTeacher(){$('loadDashboardBtn').addEventListener('click',loadDashboard);$('resultSearch').addEventListener('input',renderDashboardTable);$('exportCsvBtn').addEventListener('click',exportCsv);}
+  async function loadDashboard(){const key=$('adminKey').value.trim();if(!key){toast('กรุณากรอกรหัสผู้ดูแล');return;}const btn=$('loadDashboardBtn');setBusy(btn,true,'กำลังโหลด...');try{state.dashboard=await gas('getDashboardData',key);$('teacherLogin').classList.add('hidden');$('dashboardContent').classList.remove('hidden');renderSummary();renderDashboardTable();}catch(err){toast(err.message);}finally{setBusy(btn,false);}}
+  function renderSummary(){const s=state.dashboard.summary;const items=[['ผู้เข้าสอบ',s.total],['ผ่าน',s.pass],['ควรทบทวน',s.review],['เฉลี่ย',pct(s.average)],['สูงสุด',pct(s.highest)],['ต่ำสุด',pct(s.lowest)]];$('summaryCards').innerHTML=items.map(x=>`<div class="summary-card"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');}
+  function renderDashboardTable(){if(!state.dashboard)return;const q=$('resultSearch').value.trim().toLowerCase();const rows=state.dashboard.attempts.filter(r=>[r.studentId,r.name,r.className,r.room,r.number,r.formId].join(' ').toLowerCase().includes(q));$('resultTableBody').innerHTML=rows.map(r=>`<tr><td>${safe(r.studentId)}</td><td>${safe(r.name)}</td><td>${safe(r.className)}/${safe(r.room)} #${safe(r.number)}</td><td>${safe(r.formId)}</td><td>${pct(r.percent)}</td><td>${pct(r.accountPercent)}</td><td>${pct(r.categoryPercent)}</td><td>${pct(r.changePercent)}</td><td class="${r.status==='ผ่าน'?'status-pass':'status-review'}">${safe(r.status)}</td><td>${formatDate(r.submitTime)}</td></tr>`).join('');}
+  function safe(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+  function formatDate(v){if(!v)return'';try{return new Intl.DateTimeFormat('th-TH',{dateStyle:'short',timeStyle:'short'}).format(new Date(v));}catch(_){return v;}}
+  function exportCsv(){if(!state.dashboard)return;const headers=['StudentID','Name','Class','Room','Number','Form','Percent','Account','Category','Change','Status','SubmitTime'];const lines=[headers,state.dashboard.attempts.map(r=>[r.studentId,r.name,r.className,r.room,r.number,r.formId,r.percent,r.accountPercent,r.categoryPercent,r.changePercent,r.status,r.submitTime])].flat();const csv='\ufeff'+lines.map(row=>row.map(escapeCsv).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='accounting-test-results.csv';a.click();URL.revokeObjectURL(a.href);}
+
+  boot();
+})();
+</script>

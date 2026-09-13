@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="brand-title" id="brandTitle">แบบทดสอบการวิเคราะห์รายการค้า</div>
+        <div class="brand-subtitle">สินทรัพย์ • หนี้สิน • ส่วนของเจ้าของ</div>
+      </div>
+      <div id="timerBox" class="timer-box hidden" aria-live="polite">30:00</div>
+    </header>
+
+    <main class="container">
+      <section id="loadingView" class="panel center-panel">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>กำลังเตรียมระบบ...</p>
+      </section>
+
+      <section id="startView" class="panel hidden">
+        <div class="section-heading">
+          <h1>แบบทดสอบการวิเคราะห์รายการค้า</h1>
+          <p>วิเคราะห์ว่ารายการค้าเกี่ยวข้องกับบัญชีใด อยู่ในหมวดใด และเพิ่มขึ้นหรือลดลง</p>
+        </div>
+        <div class="instruction-box">
+          <strong>คำชี้แจง</strong>
+          <span>ระบบจะสุ่มแบบทดสอบคู่ขนาน 1 ชุด จำนวน <b id="questionCountText">20</b> ข้อ ใช้เวลา <b id="examTimeText">30</b> นาที</span>
+        </div>
+        <form id="studentForm" class="form-grid" autocomplete="off">
+          <label>รหัสนักเรียน<input name="studentId" required inputmode="numeric" maxlength="20"></label>
+          <label>ชื่อ<input name="firstName" required maxlength="80"></label>
+          <label>นามสกุล<input name="lastName" required maxlength="80"></label>
+          <label>ชั้น<input name="className" required value="ม.4" maxlength="20"></label>
+          <label>ห้อง<input name="room" required inputmode="numeric" maxlength="10"></label>
+          <label>เลขที่<input name="number" required inputmode="numeric" maxlength="10"></label>
+          <div class="form-actions full-width">
+            <button type="submit" class="btn primary">เริ่มทำแบบทดสอบ</button>
+          </div>
+        </form>
+        <p class="privacy-note">คำตอบจะตรวจบนเซิร์ฟเวอร์ และไม่ส่งเฉลยมาเก็บไว้ในหน้าเว็บ</p>
+      </section>
+
+      <section id="examView" class="hidden">
+        <div class="exam-meta">
+          <div><strong id="studentNameText"></strong><span id="studentMetaText"></span></div>
+          <div class="form-chip">ชุด <span id="formIdText">-</span></div>
+        </div>
+        <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+        <div class="exam-layout">
+          <aside class="question-nav panel compact-panel">
+            <div class="nav-title">ข้อสอบ</div>
+            <div id="questionNavGrid" class="nav-grid"></div>
+            <div class="nav-legend"><span><i class="dot answered"></i>ตอบแล้ว</span><span><i class="dot current"></i>ข้อปัจจุบัน</span></div>
+          </aside>
+          <section class="panel question-panel">
+            <div class="question-topline">
+              <span id="questionPosition">ข้อ 1 จาก 20</span>
+              <span id="difficultyText" class="difficulty"></span>
+            </div>
+            <h2 id="questionText" class="question-text"></h2>
+            <div class="answer-table-wrap">
+              <table class="answer-table">
+                <thead><tr><th>บัญชีที่เกี่ยวข้อง</th><th>หมวดบัญชี</th><th>การเปลี่ยนแปลง</th></tr></thead>
+                <tbody id="answerRows"></tbody>
+              </table>
+            </div>
+            <div class="exam-actions">
+              <button id="prevBtn" class="btn secondary" type="button">ย้อนกลับ</button>
+              <button id="nextBtn" class="btn primary" type="button">ถัดไป</button>
+              <button id="submitBtn" class="btn success hidden" type="button">ส่งคำตอบ</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="resultView" class="panel hidden">
+        <div class="result-hero">
+          <div id="resultStatus" class="result-status">ผ่าน</div>
+          <div id="resultScore" class="result-score">0%</div>
+          <h2 id="resultName"></h2>
+          <p id="resultMeta"></p>
+        </div>
+        <div class="skill-grid">
+          <div class="skill-card"><span>ระบุบัญชี</span><b id="accountScore">0%</b><div class="mini-track"><i id="accountBar"></i></div></div>
+          <div class="skill-card"><span>จำแนกหมวดบัญชี</span><b id="categoryScore">0%</b><div class="mini-track"><i id="categoryBar"></i></div></div>
+          <div class="skill-card"><span>วิเคราะห์เพิ่ม/ลด</span><b id="changeScore">0%</b><div class="mini-track"><i id="changeBar"></i></div></div>
+        </div>
+        <div id="recommendation" class="recommendation"></div>
+        <div class="form-actions"><button id="restartBtn" class="btn secondary" type="button">กลับหน้าแรก</button></div>
+      </section>
+
+      <section id="teacherView" class="hidden">
+        <div class="panel teacher-login" id="teacherLogin">
+          <div class="section-heading"><h1>แดชบอร์ดครู</h1><p>กรอกรหัสผู้ดูแลที่ตั้งไว้ใน Script Properties</p></div>
+          <div class="inline-form"><input id="adminKey" type="password" placeholder="ADMIN_KEY"><button id="loadDashboardBtn" class="btn primary" type="button">เข้าสู่แดชบอร์ด</button></div>
+        </div>
+        <div id="dashboardContent" class="hidden">
+          <div class="dashboard-head"><div><h1>ผลการทดสอบ</h1><p>ภาพรวมผลการวิเคราะห์รายการค้า</p></div><button id="exportCsvBtn" class="btn secondary" type="button">Export CSV</button></div>
+          <div id="summaryCards" class="summary-grid"></div>
+          <div class="panel">
+            <div class="table-toolbar"><input id="resultSearch" placeholder="ค้นหาชื่อ รหัส ชั้น หรือห้อง"></div>
+            <div class="table-scroll"><table class="result-table"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>ชั้น/ห้อง</th><th>ชุด</th><th>รวม</th><th>บัญชี</th><th>หมวด</th><th>เพิ่ม/ลด</th><th>สถานะ</th><th>เวลาส่ง</th></tr></thead><tbody id="resultTableBody"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-card"><h3 id="modalTitle">ยืนยันการส่ง</h3><p id="modalMessage"></p><div class="modal-actions"><button id="modalCancel" class="btn secondary" type="button">ยกเลิก</button><button id="modalConfirm" class="btn primary" type="button">ยืนยัน</button></div></div>
+    </div>
+    <div id="toast" class="toast hidden" role="status"></div>
+  </div>
+  <script>window.INITIAL_VIEW = <?!= JSON.stringify(initialView) ?>;</script>
+  <?!= include('JavaScript'); ?>
+</body>
+</html>
