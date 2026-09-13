@@ -11,141 +11,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --navy: #123d72;
-      --blue: #1f67b1;
-      --pale: #eef6ff;
-      --line: #dbe8f6;
-      --text: #17324d;
-      --muted: #63798f;
-      --white: #ffffff;
+      --navy:#123d72;
+      --blue:#1f67b1;
+      --pale:#eef6ff;
+      --line:#dbe8f6;
+      --text:#17324d;
+      --muted:#63798f;
+      --white:#fff;
     }
-
-    * { box-sizing: border-box; }
-
-    html, body { height: 100%; margin: 0; }
-
-    body {
-      font-family: "Sarabun", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background: var(--pale);
-      overflow: hidden;
-    }
-
-    .page {
-      height: 100dvh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-
-    .topbar {
-      min-height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px clamp(14px, 3vw, 28px);
-      background: var(--white);
-      border-bottom: 1px solid var(--line);
-      box-shadow: 0 2px 12px rgba(18, 61, 114, .06);
-      z-index: 3;
-    }
-
-    .brand { min-width: 0; }
-
-    .brand h1 {
-      margin: 0;
-      color: var(--navy);
-      font-size: clamp(17px, 2.2vw, 22px);
-      line-height: 1.2;
-      font-weight: 700;
-    }
-
-    .brand p {
-      margin: 3px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .open-direct {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 42px;
-      padding: 0 15px;
-      border-radius: 10px;
-      color: var(--white);
-      background: var(--navy);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      transition: transform .15s ease, background .15s ease;
-    }
-
-    .open-direct:hover { background: var(--blue); transform: translateY(-1px); }
-    .open-direct:focus-visible { outline: 3px solid rgba(31, 103, 177, .25); outline-offset: 2px; }
-
-    .app-area {
-      position: relative;
-      min-height: 0;
-      background: var(--white);
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-      background: var(--white);
-    }
-
-    .loading {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: var(--pale);
-      z-index: 2;
-      transition: opacity .25s ease, visibility .25s ease;
-    }
-
-    .loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
-    .loading-card {
-      width: min(420px, 100%);
-      padding: 26px;
-      text-align: center;
-      background: var(--white);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      box-shadow: 0 12px 36px rgba(18, 61, 114, .10);
-    }
-
-    .spinner {
-      width: 38px;
-      height: 38px;
-      margin: 0 auto 16px;
-      border: 4px solid #dfeaf6;
-      border-top-color: var(--blue);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-
-    .loading-card strong { display: block; color: var(--navy); font-size: 18px; }
-    .loading-card span { display: block; margin-top: 6px; color: var(--muted); font-size: 14px; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    @media (max-width: 640px) {
-      .page { grid-template-rows: auto 1fr; }
-      .topbar { min-height: 58px; padding: 9px 12px; }
-      .brand p { display: none; }
-      .open-direct { min-height: 38px; padding: 0 11px; font-size: 13px; }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Sarabun",sans-serif;color:var(--text);background:var(--pale)}
+    .page{min-height:100dvh;display:grid;grid-template-rows:auto 1fr}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(16px,4vw,42px);background:#fff;border-bottom:1px solid var(--line)}
+    .brand h1{margin:0;color:var(--navy);font-size:clamp(22px,3vw,34px);line-height:1.2}
+    .brand p{margin:5px 0 0;color:var(--muted);font-size:15px}
+    main{display:grid;place-items:center;padding:28px 18px}
+    .card{width:min(720px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 50px rgba(18,61,114,.10);padding:clamp(28px,5vw,48px);text-align:center}
+    .icon{width:72px;height:72px;margin:0 auto 20px;border-radius:20px;background:var(--pale);display:grid;place-items:center;color:var(--navy);font-size:34px;font-weight:700}
+    h2{margin:0;color:var(--navy);font-size:clamp(24px,3vw,32px)}
+    .lead{margin:12px auto 0;max-width:560px;color:var(--muted);font-size:17px;line-height:1.7}
+    .info{margin:24px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .info div{padding:14px 10px;border:1px solid var(--line);border-radius:14px;background:#f9fcff}
+    .info b{display:block;color:var(--navy);font-size:20px}.info span{display:block;margin-top:3px;color:var(--muted);font-size:13px}
+    .start{display:inline-flex;align-items:center;justify-content:center;min-width:min(360px,100%);min-height:58px;padding:0 28px;border-radius:14px;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:20px;box-shadow:0 10px 24px rgba(18,61,114,.18)}
+    .start:hover{background:var(--blue)}
+    .note{margin:14px 0 0;color:var(--muted);font-size:13px}
+    @media(max-width:640px){.brand p{display:none}.topbar{padding:12px 14px}.info{grid-template-columns:1fr}.card{padding:28px 20px}.start{min-width:100%}}
   </style>
 </head>
 <body>
@@ -155,39 +46,21 @@
         <h1>แบบทดสอบการวิเคราะห์รายการค้า</h1>
         <p>สินทรัพย์ • หนี้สิน • ส่วนของเจ้าของ</p>
       </div>
-      <a class="open-direct" href="https://script.google.com/macros/s/AKfycbwGK6Y9o1sanqMWWHTs1tRDkMp9g4a30M1FjgO95HzwgCf9OSqI8AXGr8gi-_lT3ARe/exec" target="_blank" rel="noopener">เปิดเต็มหน้าจอ</a>
     </header>
-
-    <main class="app-area">
-      <div id="loading" class="loading" aria-live="polite">
-        <div class="loading-card">
-          <div class="spinner" aria-hidden="true"></div>
-          <strong>กำลังเปิดระบบทดสอบ</strong>
-          <span>กรุณารอสักครู่ หากระบบไม่แสดง ให้กด “เปิดเต็มหน้าจอ” ด้านบน</span>
+    <main>
+      <section class="card">
+        <div class="icon">✓</div>
+        <h2>พร้อมเริ่มทำแบบทดสอบ</h2>
+        <p class="lead">ระบบจะเปิดแบบทดสอบจาก Google Apps Script โดยตรง เพื่อให้โหลดเร็วและเสถียรกว่าการฝังหน้าเว็บผ่าน iframe</p>
+        <div class="info">
+          <div><b>20 ข้อ</b><span>แบบทดสอบต่อคน</span></div>
+          <div><b>30 นาที</b><span>เวลาทำแบบทดสอบ</span></div>
+          <div><b>60%</b><span>เกณฑ์ผ่าน</span></div>
         </div>
-      </div>
-
-      <iframe
-        id="examFrame"
-        title="ระบบทดสอบการวิเคราะห์รายการค้า"
-        src="https://script.google.com/macros/s/AKfycbwGK6Y9o1sanqMWWHTs1tRDkMp9g4a30M1FjgO95HzwgCf9OSqI8AXGr8gi-_lT3ARe/exec"
-        allow="clipboard-write"
-        referrerpolicy="strict-origin-when-cross-origin">
-      </iframe>
+        <a class="start" href="https://script.google.com/macros/s/AKfycbwGK6Y9o1sanqMWWHTs1tRDkMp9g4a30M1FjgO95HzwgCf9OSqI8AXGr8gi-_lT3ARe/exec">เริ่มทำแบบทดสอบ</a>
+        <p class="note">หากหน้าแบบทดสอบเปิดช้า กรุณารอสักครู่ เนื่องจาก Google Apps Script อาจมีเวลาเริ่มต้นระบบในครั้งแรก</p>
+      </section>
     </main>
   </div>
-
-  <script>
-    const frame = document.getElementById('examFrame');
-    const loading = document.getElementById('loading');
-
-    frame.addEventListener('load', () => {
-      window.setTimeout(() => loading.classList.add('hidden'), 250);
-    });
-
-    window.setTimeout(() => {
-      loading.querySelector('span').textContent = 'หากยังไม่เห็นหน้าแบบทดสอบ ให้กด “เปิดเต็มหน้าจอ” ด้านบน';
-    }, 8000);
-  </script>
 </body>
 </html>
